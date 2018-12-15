@@ -59,11 +59,15 @@ __slouch_drun() {
 ```
 
 To configure fzf-specific stuff you can override `__slouch_fzf`.
-The simplest being:
+E.g. if you want to add previews for files:
 
 ```sh
 __slouch_fzf() {
-    fzf $@
+    if [ "$1" = 'filter' ]; then
+        fzf --preview='cat {} || tree {}' $2
+    else
+        fzf $2
+    fi
 }
 ```
 
@@ -80,7 +84,7 @@ hc rule title='slouch' focus=on pseudotile=on
 |-----------------------|-------------------------------------------------------------------|-----------|
 | `__slouch_focus`      | focus the given window                                            | `$1` = X window id |
 | `__slouch_pdetach`    | run and detach the given program from the shell                   | `$@` = command to be ran |
-| `__slouch_fzf`        | run fzf                                                           | `$@` = additional arguments |
+| `__slouch_fzf`        | run fzf                                                           | `$1` = mode (window/drun/run/filter), `$2` = additional arguments |
 | `__slouch_term`       | run a terminal which runs the slouch script with a given argument | `$1` = argument to be forwarded |
 | `__slouch_window_ids` | get a tab separated list of window IDs and window names           | none |
 | `__slouch_drun`       | run a freedesktop entry                                           | `$1` = whether command should be ran in a terminal (empty = no), `$2` = command to be executed |

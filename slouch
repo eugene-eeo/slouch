@@ -1,8 +1,8 @@
 #!/bin/bash
 __slouch_fzf() {
-    # shellcheck disable=2068
-    fzf +m --layout=reverse --margin=1,2 --prompt='∴ ' -d$'\t' \
-        --color=prompt:7,pointer:7,spinner:2,info:8,hl:2,hl+:2,marker:0 $@
+    # shellcheck disable=2086
+    fzf +m --layout=reverse --margin=1,2 --prompt='∴ ' \
+        --color=prompt:7,pointer:7,spinner:2,info:8,hl:2,hl+:2,marker:0 $2
 }
 
 __slouch_pdetach() {
@@ -72,7 +72,7 @@ __slouch_drun() {
 
 case "$1" in
     _drun)
-        if choice=$(__slouch_freedesktop_entries | __slouch_fzf --with-nth=1); then
+        if choice=$(__slouch_freedesktop_entries | __slouch_fzf drun '-d\t --with-nth=1'); then
             term=$(echo "$choice" | cut -d$'\t' -f2)
             exec=$(echo "$choice" | cut -d$'\t' -f3)
             path=$(echo "$choice" | cut -d$'\t' -f4)
@@ -81,15 +81,15 @@ case "$1" in
         fi
         ;;
     _run)
-        choice=$(compgen -c | sort -u | grep -v '^\([:!.{}]\|\[\[\|]]\|\[\)$\|^__slouch' | __slouch_fzf) \
+        choice=$(compgen -c | sort -u | grep -v '^\([:!.{}]\|\[\[\|]]\|\[\)$\|^__slouch' | __slouch_fzf run) \
             && __slouch_pdetach "$choice"
         ;;
     _filter)
-        choice=$(find ~ -name '.*' -prune -o -print | sed "s|^$HOME|~|" | __slouch_fzf) \
+        choice=$(find ~ -name '.*' -prune -o -print | sed "s|^$HOME|~|" | __slouch_fzf filter) \
             && __slouch_pdetach xdg-open "$HOME${choice:1}"
         ;;
     _window)
-        wid=$(__slouch_window_ids | __slouch_fzf --with-nth=2.. | cut -d$'\t' -f1) \
+        wid=$(__slouch_window_ids | __slouch_fzf window '-d\t --with-nth=2..' | cut -d$'\t' -f1) \
             && __slouch_focus "$wid"
         ;;
     run)    __slouch_term _run    ;;
