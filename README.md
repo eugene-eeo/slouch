@@ -53,6 +53,13 @@ __slouch_drun() {
 }
 ```
 
+To make `slouch` look better you might have to fiddle with the rules on your
+window manager. For instance on herbstluftwm:
+
+```
+hc rule title='slouch' focus=on pseudotile=on
+```
+
 ### Available hooks
 
 | Name                  | Description                                                       | Arguments |
