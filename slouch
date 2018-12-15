@@ -1,0 +1,100 @@
+#!/bin/bash
+
+__slouch_fzf() {
+    # shellcheck disable=2068
+    fzf +m --layout=reverse --margin=1,2 --prompt='∴ ' -d$'\t' \
+        --color=prompt:7,pointer:7,spinner:2,info:8,hl:2,hl+:2,marker:0 $@
+}
+
+__slouch_pdetach() {
+    # shellcheck disable=2068
+    nohup $@ > /dev/null 2> /dev/null &
+    sleep 0.1 # don't question this hack
+}
+
+__slouch_run() {
+    st -t 'slouch' -a -g "80x20+570+300" -e "$0" "$1"
+}
+
+__slouch_window_ids() {
+    IFS=', '
+    for wid in $(xprop -root | grep '^_NET_CLIENT_LIST(WINDOW)' | cut -d ' ' -f5-); do
+        name=$(xwininfo -id "$wid" -wm | grep '^xwininfo:' | cut -d ' ' -f5-)
+        name="${name:1:-1}"
+        [[ $name != 'slouch' ]] && echo -e "$wid\t$name"
+    done
+}
+
+__slouch_focus() {
+    herbstclient jumpto "$1"
+    herbstclient raise "$1"
+}
+
+__slouch_freedesktop_entries() {
+    files=$(find /usr/share/applications/ -maxdepth 1 -type f -name '*.desktop' | sort)
+    sum=$(echo "$files" | sha1sum | cut -d ' ' -f1)
+    tmp="/tmp/slouch.drun.$sum"
+    if [ -e "$tmp" ]; then
+        cat "$tmp" && exit
+    fi
+    for file in $files; do
+        name=''
+        path=''
+        term=''
+        exec=''
+        hide=''
+        while IFS= read -r line; do
+            case "$line" in
+                Name=*) [ ! "$name" ] && name=$(echo "$line" | cut -d '=' -f2-) ;;
+                Path=*) [ ! "$path" ] && path=$(echo "$line" | cut -d '=' -f2-) ;;
+                Exec=*) [ ! "$exec" ] && exec=$(echo "$line" | cut -d '=' -f2- | grep -v '%[UuFf]') ;;
+                Terminal=true) term='y' ;;
+                Type=Link)              ;&
+                Type=Directory)         ;&
+                NoDisplay=true)         ;&
+                NotShowIn=*)   hide='y' ;;
+            esac
+        done < "$file"
+        [ ! "$hide" ] && [ "$name" ] && [ "$exec" ] \
+            && echo -e "${name}\t${term}\t${exec}\t${path}"
+    done | tee "$tmp"
+}
+
+__slouch_drun() {
+    if [ "$1" ]; then
+        __slouch_pdetach st -e "$2"
+    else
+        __slouch_pdetach "$2"
+    fi
+}
+
+. ~/.config/slouch/hooks
+
+case "$1" in
+    _drun)
+        if choice=$(__slouch_freedesktop_entries | __slouch_fzf --with-nth=1); then
+            term=$(echo "$choice" | cut -d$'\t' -f2)
+            exec=$(echo "$choice" | cut -d$'\t' -f3)
+            path=$(echo "$choice" | cut -d$'\t' -f4)
+            [ "$path" ] && (cd "$path" || exit)
+            __slouch_drun "$term" "$exec"
+        fi
+        ;;
+    _run)
+        choice=$(compgen -c | sort -u | grep -v '^\([:!.{}]\|\[\[\|]]\|\[\)$\|^__slouch' | __slouch_fzf) \
+            && __slouch_pdetach "$choice"
+        ;;
+    _filter)
+        choice=$(find ~ -name '.*' -prune -o -print | sed "s|^$HOME|~|" | __slouch_fzf) \
+            && __slouch_pdetach xdg-open "$HOME${choice:1}"
+        ;;
+    _window)
+        wid=$(__slouch_window_ids | __slouch_fzf --with-nth=2.. | cut -d$'\t' -f1) \
+            && __slouch_focus "$wid"
+        ;;
+    run)    __slouch_run _run    ;;
+    drun)   __slouch_run _drun   ;;
+    filter) __slouch_run _filter ;;
+    window) __slouch_run _window ;;
+    *)      echo 'usage: slouch (run | drun | filter | window)'
+esac
