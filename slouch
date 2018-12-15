@@ -1,5 +1,4 @@
 #!/bin/bash
-
 __slouch_fzf() {
     # shellcheck disable=2068
     fzf +m --layout=reverse --margin=1,2 --prompt='∴ ' -d$'\t' \
@@ -68,6 +67,7 @@ __slouch_drun() {
     fi
 }
 
+# shellcheck source=/dev/null
 . ~/.config/slouch/hooks
 
 case "$1" in
