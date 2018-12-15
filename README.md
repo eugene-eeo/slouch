@@ -1,13 +1,13 @@
 # slouch
 
-Shitty version of rofi/dmenu using your favourite terminal and fzf.
-The rationale behind this is that I already have a fuzzy finder installed and a terminal so
-we should let those tools do the hard work and we just glue them together.
+Shitty version of rofi/dmenu using your favourite terminal, bash, and fzf.
+The rationale behind this is that
+I already have a fuzzy finder and a terminal installed so we should just glue them together.
 I wanted to call it `slaunch` at first, but slouch seems more appropriate.
 
 ## install
 
-Requires [fzf](https://github.com/junegunn/fzf).
+Requires [fzf](https://github.com/junegunn/fzf) and bash.
 
 ```sh
 $ mkdir ~/.config/slouch/
@@ -59,8 +59,15 @@ __slouch_drun() {
 ```
 
 To configure fzf-specific stuff you can override `__slouch_fzf`.
+The simplest being:
 
-To make `slouch` look better you might have to fiddle with the rules on your window manager.
+```sh
+__slouch_fzf() {
+    fzf $@
+}
+```
+
+To make `slouch` look better you might have to fiddle with your window manager.
 For instance on herbstluftwm you can add this to your autostart:
 
 ```sh
