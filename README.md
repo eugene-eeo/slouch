@@ -6,6 +6,8 @@ seems more appropriate.
 
 ## install
 
+Requires [fzf](https://github.com/junegunn/fzf).
+
 ```sh
 $ mkdir ~/.config/slouch/
 $ touch ~/.config/slouch/hooks
