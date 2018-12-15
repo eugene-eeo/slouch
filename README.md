@@ -1,8 +1,9 @@
 # slouch
 
-Shitty version of rofi/dmenu using your favourite terminal
-and fzf. I wanted to call it `slaunch` at first, but slouch
-seems more appropriate.
+Shitty version of rofi/dmenu using your favourite terminal and fzf.
+The rationale behind this is that I already have a fuzzy finder installed and a terminal so
+we should let those tools do the hard work and we just glue them together.
+I wanted to call it `slaunch` at first, but slouch seems more appropriate.
 
 ## install
 
@@ -26,6 +27,7 @@ $ slouch filter  # xdg-open files
 ## config
 
 You can override parts of `slouch` using a bash script in `~/.config/slouch/hooks`.
+This 'config file' is just sourced by `slouch`.
 For instance, by default `slouch` assumes that you are using [herbstluftwm](https://herbstluftwm.org/).
 This means that if you have a different window manager then focusing windows won't work.
 To override this you can add this to your slouch config file:
@@ -38,12 +40,12 @@ __slouch_focus() {
 }
 ```
 
-Usually you'd want to override `__slouch_run` and `__slouch_drun` as well.
+Usually you'd want to override `__slouch_term` and `__slouch_drun` as well.
 By default slouch assumes that you're using `st`.
 So if you use `urxvt` then you might do:
 
 ```sh
-__slouch_run() {
+__slouch_term() {
     urxvt -title slouch -geometry 80x20+570+300 -e "$0" "$1"
 }
 
@@ -56,20 +58,22 @@ __slouch_drun() {
 }
 ```
 
-To make `slouch` look better you might have to fiddle with the rules on your
-window manager. For instance on herbstluftwm you can add this to your autostart:
+To configure fzf-specific stuff you can override `__slouch_fzf`.
+
+To make `slouch` look better you might have to fiddle with the rules on your window manager.
+For instance on herbstluftwm you can add this to your autostart:
 
 ```sh
 hc rule title='slouch' focus=on pseudotile=on
 ```
 
-### Available hooks
+### available hooks
 
 | Name                  | Description                                                       | Arguments |
 |-----------------------|-------------------------------------------------------------------|-----------|
 | `__slouch_focus`      | focus the given window                                            | `$1` = X window id |
 | `__slouch_pdetach`    | run and detach the given program from the shell                   | `$@` = command to be ran |
 | `__slouch_fzf`        | run fzf                                                           | `$@` = additional arguments |
-| `__slouch_run`        | run a terminal which runs the slouch script with a given argument | `$1` = argument given to slouch |
+| `__slouch_term`       | run a terminal which runs the slouch script with a given argument | `$1` = argument to be forwarded |
 | `__slouch_window_ids` | get a tab separated list of window IDs and window names           | none |
 | `__slouch_drun`       | run a freedesktop entry                                           | `$1` = whether command should be ran in a terminal (empty = no), `$2` = command to be executed |

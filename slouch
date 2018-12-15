@@ -11,7 +11,7 @@ __slouch_pdetach() {
     sleep 0.1 # don't question this hack
 }
 
-__slouch_run() {
+__slouch_term() {
     st -t 'slouch' -a -g "80x20+570+300" -e "$0" "$1"
 }
 
@@ -92,9 +92,9 @@ case "$1" in
         wid=$(__slouch_window_ids | __slouch_fzf --with-nth=2.. | cut -d$'\t' -f1) \
             && __slouch_focus "$wid"
         ;;
-    run)    __slouch_run _run    ;;
-    drun)   __slouch_run _drun   ;;
-    filter) __slouch_run _filter ;;
-    window) __slouch_run _window ;;
+    run)    __slouch_term _run    ;;
+    drun)   __slouch_term _drun   ;;
+    filter) __slouch_term _filter ;;
+    window) __slouch_term _window ;;
     *)      echo 'usage: slouch (run | drun | filter | window)'
 esac
