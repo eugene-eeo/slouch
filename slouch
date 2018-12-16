@@ -12,7 +12,8 @@ __slouch_pdetach() {
 }
 
 __slouch_term() {
-    st -t 'slouch' -a -g "80x20+570+300" -e "$0" "$1"
+    # shellcheck disable=2068
+    st -t 'slouch' -a -g "80x20+570+300" -e "$0" $@
 }
 
 __slouch_window_ids() {
@@ -20,7 +21,7 @@ __slouch_window_ids() {
     for wid in $(xprop -root | grep '^_NET_CLIENT_LIST(WINDOW)' | cut -d ' ' -f5-); do
         name=$(xwininfo -id "$wid" -wm | grep '^xwininfo:' | cut -d ' ' -f5-)
         name="${name:1:-1}"
-        [[ $name != 'slouch' ]] && echo -e "$wid\t$name"
+        [ "$name" != 'slouch' ] && echo -e "$wid\t$name"
     done
 }
 
@@ -89,12 +90,27 @@ case "$1" in
             && __slouch_pdetach xdg-open "$HOME${choice:1}"
         ;;
     _window)
-        wid=$(__slouch_window_ids | __slouch_fzf window '-d\t --with-nth=2..' | cut -d$'\t' -f1) \
+        wid=$(__slouch_window_ids | __slouch_fzf window '-d\t --with-nth=2' | cut -d$'\t' -f1) \
             && __slouch_focus "$wid"
         ;;
+    _pipe)  __slouch_fzf > "$2" < "$3" ;;
     run)    __slouch_term _run    ;;
     drun)   __slouch_term _drun   ;;
     filter) __slouch_term _filter ;;
     window) __slouch_term _window ;;
-    *)      echo 'usage: slouch (run | drun | filter | window)'
+    pipe)
+        in=$(mktemp -u)
+        out=$(mktemp -u)
+        mkfifo "$in"
+        mkfifo "$out"
+        __slouch_term _pipe "$out" "$in" 2> /dev/null &
+        cat > "$in" &
+        cat "$out"
+        rm "$in" "$out"
+        ;;
+    ""|-h|--help)
+        echo 'usage:'
+        echo '  slouch run | drun | filter | window | pipe'
+        echo '  slouch -h | --help'
+        ;;
 esac

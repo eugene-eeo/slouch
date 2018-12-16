@@ -18,10 +18,11 @@ $ chmod +x ~/.config/slouch/hooks
 ## run
 
 ```sh
-$ slouch run     # runs executables in $PATH
-$ slouch drun    # runs desktop entries
-$ slouch window  # switch to windows
-$ slouch filter  # xdg-open files
+$ slouch run               # runs executables in $PATH
+$ slouch drun              # runs desktop entries
+$ slouch window            # switch to windows
+$ slouch filter            # xdg-open files
+$ cat $(ls | slouch pipe)  # fzf with a gui
 ```
 
 ## config
@@ -46,7 +47,7 @@ So if you use `urxvt` then you might do:
 
 ```sh
 __slouch_term() {
-    urxvt -title slouch -geometry 80x20+570+300 -e "$0" "$1"
+    urxvt -title slouch -geometry 80x20+570+300 -e $0 $@
 }
 
 __slouch_drun() {
@@ -84,7 +85,7 @@ hc rule title='slouch' focus=on pseudotile=on
 |-----------------------|-------------------------------------------------------------------|-----------|
 | `__slouch_focus`      | focus the given window                                            | `$1` = X window id |
 | `__slouch_pdetach`    | run and detach the given program from the shell                   | `$@` = command to be ran |
+| `__slouch_term`       | run a terminal which runs the slouch script with a given argument | `$@` = command to be ran |
 | `__slouch_fzf`        | run fzf                                                           | `$1` = mode (window/drun/run/filter), `$2` = additional arguments |
-| `__slouch_term`       | run a terminal which runs the slouch script with a given argument | `$1` = argument to be forwarded |
 | `__slouch_window_ids` | get a tab separated list of window IDs and window names           | none |
 | `__slouch_drun`       | run a freedesktop entry                                           | `$1` = whether command should be ran in a terminal (empty = no), `$2` = command to be executed |
