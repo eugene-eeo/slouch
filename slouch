@@ -75,9 +75,9 @@ __slouch_drun() {
 case "$1" in
     _drun)
         if choice=$(__slouch_freedesktop_entries | __slouch_fzf drun -d'\t' --with-nth=4); then
-            term=$(echo "$choice" | cut -d$'\t' -f2)
-            exec=$(echo "$choice" | cut -d$'\t' -f3)
-            path=$(echo "$choice" | cut -d$'\t' -f4)
+            term=$(echo "$choice" | cut -d$'\t' -f1)
+            exec=$(echo "$choice" | cut -d$'\t' -f2)
+            path=$(echo "$choice" | cut -d$'\t' -f3)
             [ "$path" ] && (cd "$path" || exit)
             __slouch_drun "$term" "$exec"
         fi
