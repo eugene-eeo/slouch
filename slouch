@@ -1,8 +1,9 @@
 #!/bin/bash
 __slouch_fzf() {
-    # shellcheck disable=2086
+    shift
+    # shellcheck disable=2068
     fzf +m --layout=reverse --margin=1,2 --prompt='∴ ' \
-        --color=prompt:7,pointer:7,spinner:2,info:8,hl:2,hl+:2,marker:0 $2
+        --color=prompt:7,pointer:7,spinner:2,info:8,hl:2,hl+:2,marker:0 $@
 }
 
 __slouch_pdetach() {
@@ -56,7 +57,7 @@ __slouch_freedesktop_entries() {
             esac
         done < "$file"
         [ ! "$hide" ] && [ "$name" ] && [ "$exec" ] \
-            && echo -e "${name}\t${term}\t${exec}\t${path}"
+            && echo -e "${term}\t${exec}\t${path}\t${name}"
     done | tee "$tmp"
 }
 
@@ -73,7 +74,7 @@ __slouch_drun() {
 
 case "$1" in
     _drun)
-        if choice=$(__slouch_freedesktop_entries | __slouch_fzf drun '-d\t --with-nth=1'); then
+        if choice=$(__slouch_freedesktop_entries | __slouch_fzf drun -d'\t' --with-nth=4); then
             term=$(echo "$choice" | cut -d$'\t' -f2)
             exec=$(echo "$choice" | cut -d$'\t' -f3)
             path=$(echo "$choice" | cut -d$'\t' -f4)
@@ -90,7 +91,7 @@ case "$1" in
             && __slouch_pdetach xdg-open "$HOME${choice:1}"
         ;;
     _window)
-        wid=$(__slouch_window_ids | __slouch_fzf window '-d\t --with-nth=2' | cut -d$'\t' -f1) \
+        wid=$(__slouch_window_ids | __slouch_fzf window -d'\t' --with-nth=2 | cut -d$'\t' -f1) \
             && __slouch_focus "$wid"
         ;;
     _pipe)  __slouch_fzf > "$2" < "$3" ;;

@@ -65,9 +65,11 @@ E.g. if you want to add previews for files:
 ```sh
 __slouch_fzf() {
     if [ "$1" = 'filter' ]; then
-        fzf --preview='cat {} || tree {}' $2
+        shift
+        fzf --preview='cat {} || tree {}' $@
     else
-        fzf $2
+        shift
+        fzf $@
     fi
 }
 ```
@@ -86,6 +88,6 @@ hc rule title='slouch' focus=on pseudotile=on
 | `__slouch_focus`      | focus the given window                                            | `$1` = X window id |
 | `__slouch_pdetach`    | run and detach the given program from the shell                   | `$@` = command to be ran |
 | `__slouch_term`       | run a terminal which runs the slouch script with a given argument | `$@` = command to be ran |
-| `__slouch_fzf`        | run fzf                                                           | `$1` = mode (window/drun/run/filter), `$2` = additional arguments |
+| `__slouch_fzf`        | run fzf                                                           | `$1` = mode (window/drun/run/filter), `$2,$3,...` = additional arguments |
 | `__slouch_window_ids` | get a tab separated list of window IDs and window names           | none |
 | `__slouch_drun`       | run a freedesktop entry                                           | `$1` = whether command should be ran in a terminal (empty = no), `$2` = command to be executed |
