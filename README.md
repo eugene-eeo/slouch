@@ -1,9 +1,9 @@
 # slouch
 
 Shitty version of rofi/dmenu using your favourite terminal, bash, and fzf.
-The rationale behind this is that
+The rationale behind this being
 I already have a fuzzy finder and a terminal installed so we should just glue them together.
-I wanted to call it `slaunch` at first, but slouch seems more appropriate.
+This is being dogfooded everyday by me.
 
 ## install
 
