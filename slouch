@@ -83,7 +83,8 @@ case "$1" in
         fi
         ;;
     _run)
-        choice=$(compgen -c | sort -u | grep -v '^\([:!.{}]\|\[\[\|]]\|\[\)$\|^__slouch' | __slouch_fzf run) \
+        IFS=':'
+        choice=$(find $PATH -type f,l -executable -printf '%f\n' | grep -v '^\[$' | sort | __slouch_fzf run) \
             && __slouch_pdetach "$choice"
         ;;
     _filter)
