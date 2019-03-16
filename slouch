@@ -1,8 +1,9 @@
 #!/bin/bash
 __slouch_fzf() {
+    mode=$1
     shift
     # shellcheck disable=2068
-    fzf +m --layout=reverse --margin=1,2 --prompt='∴ ' \
+    fzf +m --layout=reverse --margin=1,2 --prompt="$mode: " \
         --color=prompt:7,pointer:7,spinner:2,info:8,hl:2,hl+:2,marker:0 $@
 }
 
