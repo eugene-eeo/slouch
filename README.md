@@ -88,6 +88,6 @@ hc rule title='slouch' focus=on pseudotile=on
 | `__slouch_focus`      | focus the given window                                            | `$1` = X window id |
 | `__slouch_pdetach`    | run and detach the given program from the shell                   | `$@` = command to be ran |
 | `__slouch_term`       | run a terminal which runs the slouch script with a given argument | `$@` = command to be ran |
-| `__slouch_fzf`        | run fzf                                                           | `$1` = mode (window/drun/run/filter), `$2,$3,...` = additional arguments |
+| `__slouch_fzf`        | run fzf                                                           | `$1` = mode (window/drun/run/filter/...), `$2,$3,...` = additional arguments. If `slouch pipe` is invoked, then the mode is either pipe or some other text, which depends on `slouch pipe <mode>` |
 | `__slouch_window_ids` | get a tab separated list of window IDs and window names           | none |
 | `__slouch_drun`       | run a freedesktop entry                                           | `$1` = whether command should be ran in a terminal (empty = no), `$2` = command to be executed |

@@ -85,6 +85,7 @@ case "$1" in
         ;;
     _run)
         IFS=':'
+        # shellcheck disable=2086
         choice=$(find $PATH -type f,l -executable -printf '%f\n' | grep -v '^\[$' | sort | __slouch_fzf run) \
             && __slouch_pdetach "$choice"
         ;;
@@ -96,24 +97,27 @@ case "$1" in
         wid=$(__slouch_window_ids | __slouch_fzf window -d'\t' --with-nth=2 | cut -d$'\t' -f1) \
             && __slouch_focus "$wid"
         ;;
-    _pipe)  __slouch_fzf > "$2" < "$3" ;;
+    _pipe)  __slouch_fzf "$2" > "$3" < "$4" ;;
     run)    __slouch_term _run    ;;
     drun)   __slouch_term _drun   ;;
     filter) __slouch_term _filter ;;
     window) __slouch_term _window ;;
     pipe)
+        custom_mode="$2"
+        [ -z "$custom_mode" ] && custom_mode="pipe"
         in=$(mktemp -u)
         out=$(mktemp -u)
         mkfifo "$in"
         mkfifo "$out"
-        __slouch_term _pipe "$out" "$in" 2> /dev/null &
+        __slouch_term _pipe "$custom_mode" "$out" "$in" 2> /dev/null &
         cat > "$in" &
         cat "$out"
         rm "$in" "$out"
         ;;
     ""|-h|--help)
         echo 'usage:'
-        echo '  slouch run | drun | filter | window | pipe'
+        echo '  slouch run | drun | filter | window'
+        echo '  slouch pipe [<text>]'
         echo '  slouch -h | --help'
         ;;
 esac
