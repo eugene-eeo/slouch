@@ -2,7 +2,8 @@
 
 Shitty version of rofi/dmenu using your favourite terminal, bash, and fzf.
 The rationale behind this being
-I already have a fuzzy finder and a terminal installed so we should just glue them together.
+I already have a fuzzy finder and a terminal installed,
+so we should just glue them together.
 This is being dogfooded everyday by me.
 
 ## install
@@ -14,6 +15,8 @@ $ mkdir ~/.config/slouch/
 $ touch ~/.config/slouch/hooks
 $ chmod +x ~/.config/slouch/hooks
 ```
+
+For window switching, requires `xwininfo` and `xprop`.
 
 ## run
 
