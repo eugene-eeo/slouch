@@ -50,7 +50,7 @@ So if you use `urxvt` then you might do:
 
 ```sh
 __slouch_term() {
-    urxvt -title slouch -geometry 80x20+570+300 -e $0 $@
+    urxvt -title slouch -geometry 80x20+570+300 -e $0 "$@"
 }
 
 __slouch_drun() {
@@ -69,10 +69,10 @@ E.g. if you want to add previews for files:
 __slouch_fzf() {
     if [ "$1" = 'filter' ]; then
         shift
-        fzf --preview='cat {} || tree {}' $@
+        fzf --preview='cat {} || tree {}' "$@"
     else
         shift
-        fzf $@
+        fzf "$@"
     fi
 }
 ```
