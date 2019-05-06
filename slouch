@@ -2,20 +2,17 @@
 __slouch_fzf() {
     mode=$1
     shift
-    # shellcheck disable=2068
     fzf +m --layout=reverse --margin=1,2 --prompt="$mode: " \
-        --color=prompt:7,pointer:7,spinner:2,info:8,hl:2,hl+:2,marker:0 $@
+        --color=prompt:7,pointer:7,spinner:2,info:8,hl:2,hl+:2,marker:0 "$@"
 }
 
 __slouch_pdetach() {
-    # shellcheck disable=2068
-    nohup $@ > /dev/null 2> /dev/null &
+    nohup "$@" > /dev/null 2> /dev/null &
     sleep 0.1 # don't question this hack
 }
 
 __slouch_term() {
-    # shellcheck disable=2068
-    st -t 'slouch' -a -g "80x20+570+300" -e "$0" $@
+    st -t 'slouch' -a -g "80x20+570+300" -e "$0" "$@"
 }
 
 __slouch_window_ids() {
@@ -54,7 +51,7 @@ __slouch_freedesktop_entries() {
                 Type=Link)              ;&
                 Type=Directory)         ;&
                 NoDisplay=true)         ;&
-                NotShowIn=*)   hide='y' ;;
+                NotShowIn=*)   hide='y'; break ;;
             esac
         done < "$file"
         [ ! "$hide" ] && [ "$name" ] && [ "$exec" ] \
@@ -86,7 +83,7 @@ case "$1" in
     _run)
         IFS=':'
         # shellcheck disable=2086
-        choice=$(find $PATH -type f,l -executable -printf '%f\n' | grep -v '^\[$' | sort | __slouch_fzf run) \
+        choice=$(find $PATH -type f,l -executable -printf '%f\n' | grep -v '^\[$' | sort -u | __slouch_fzf run) \
             && __slouch_pdetach "$choice"
         ;;
     _filter)
@@ -114,10 +111,13 @@ case "$1" in
         cat "$out"
         rm "$in" "$out"
         ;;
-    ""|-h|--help)
+    -h|--help) rv=0 ;&
+    *)
         echo 'usage:'
         echo '  slouch run | drun | filter | window'
-        echo '  slouch pipe [<text>]'
+        echo '  slouch pipe [<custom-mode>]'
         echo '  slouch -h | --help'
+        [ "$rv" = 0 ] && exit 0
+        exit 1
         ;;
 esac
