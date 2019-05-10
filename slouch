@@ -34,7 +34,8 @@ __slouch_freedesktop_entries() {
     sum=$(echo "$files" | sha1sum | cut -d ' ' -f1)
     tmp="/tmp/slouch.drun.$sum"
     if [ -e "$tmp" ]; then
-        cat "$tmp" && exit
+        cat "$tmp"
+        exit
     fi
     for file in $files; do
         name=''
@@ -44,9 +45,9 @@ __slouch_freedesktop_entries() {
         hide=''
         while IFS= read -r line; do
             case "$line" in
-                Name=*) [ ! "$name" ] && name=$(echo "$line" | cut -d '=' -f2-) ;;
-                Path=*) [ ! "$path" ] && path=$(echo "$line" | cut -d '=' -f2-) ;;
-                Exec=*) [ ! "$exec" ] && exec=$(echo "$line" | cut -d '=' -f2- | grep -v '%[UuFf]') ;;
+                Name=*) [ -n "$name" ] && name=$(echo "$line" | cut -d '=' -f2-) ;;
+                Path=*) [ -n "$path" ] && path=$(echo "$line" | cut -d '=' -f2-) ;;
+                Exec=*) [ -n "$exec" ] && exec=$(echo "$line" | cut -d '=' -f2- | grep -v '%[UuFf]') ;;
                 Terminal=true) term='y' ;;
                 Type=Link)              ;&
                 Type=Directory)         ;&
@@ -69,6 +70,21 @@ __slouch_drun() {
 
 # shellcheck source=/dev/null
 . ~/.config/slouch/hooks
+
+
+# shellcheck disable=2155
+__slouch_pipe() {
+    local mode="$1"
+    local in=$(mktemp -u)
+    local out=$(mktemp -u)
+
+    mkfifo "$in"
+    mkfifo "$out"
+    __slouch_term _pipe "${mode:-pipe}" "$out" "$in" 2> /dev/null &
+    cat > "$in" &
+    cat "$out"
+    rm "$in" "$out"
+}
 
 case "$1" in
     _drun)
@@ -99,18 +115,7 @@ case "$1" in
     drun)   __slouch_term _drun   ;;
     filter) __slouch_term _filter ;;
     window) __slouch_term _window ;;
-    pipe)
-        custom_mode="$2"
-        [ -z "$custom_mode" ] && custom_mode="pipe"
-        in=$(mktemp -u)
-        out=$(mktemp -u)
-        mkfifo "$in"
-        mkfifo "$out"
-        __slouch_term _pipe "$custom_mode" "$out" "$in" 2> /dev/null &
-        cat > "$in" &
-        cat "$out"
-        rm "$in" "$out"
-        ;;
+    pipe)   __slouch_pipe "$2"    ;;
     -h|--help) rv=0 ;&
     *)
         echo 'usage:'

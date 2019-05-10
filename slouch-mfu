@@ -1,0 +1,28 @@
+#!/bin/bash
+mfu_file=~/.config/slouch/_mfu
+
+programs() {
+    {
+        IFS=':'
+        # shellcheck disable=2086
+        find $PATH -type f,l -executable -printf '%f\n' | grep -v '^\[$' | sort -u
+        cat $mfu_file
+    } | {
+        sort | uniq -c \
+             | sort -k1rn -k2 \
+             | tr -s ' ' \
+             | cut -d ' ' -f3
+    }
+}
+
+choice=$( programs | slouch pipe run )
+if [ "$choice" != '' ]; then
+    # update file
+    output=$(head -n 49 $mfu_file)
+    {
+        echo "$output"
+        echo "$choice"
+    } > $mfu_file
+    pdetach "$choice"
+    sleep 0.1
+fi
