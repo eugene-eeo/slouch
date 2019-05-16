@@ -44,9 +44,9 @@ __slouch_freedesktop_entries() {
         hide=''
         while IFS= read -r line; do
             case "$line" in
-                Name=*) [ -n "$name" ] && name=$(echo "$line" | cut -d '=' -f2-) ;;
-                Path=*) [ -n "$path" ] && path=$(echo "$line" | cut -d '=' -f2-) ;;
-                Exec=*) [ -n "$exec" ] && exec=$(echo "$line" | cut -d '=' -f2- | grep -v '%[UuFf]') ;;
+                Name=*) [ ! "$name" ] && name=$(echo "$line" | cut -d '=' -f2-) ;;
+                Path=*) [ ! "$path" ] && path=$(echo "$line" | cut -d '=' -f2-) ;;
+                Exec=*) [ ! "$exec" ] && exec=$(echo "$line" | cut -d '=' -f2- | grep -v '%[UuFf]') ;;
                 Terminal=true) term='y' ;;
                 Type=Link)              ;&
                 Type=Directory)         ;&
@@ -55,7 +55,7 @@ __slouch_freedesktop_entries() {
             esac
         done < "$file"
         [ ! "$hide" ] && [ "$name" ] && [ "$exec" ] \
-            && echo -e "${term}\t${exec}\t${path}\t${name}"
+            && printf '%s\t%s\t%s\t%s\n' "$term" "$exec" "$path" "$name"
     done | tee "$tmp"
 }
 
