@@ -7,8 +7,7 @@ __slouch_fzf() {
 }
 
 __slouch_pdetach() {
-    nohup "$@" > /dev/null 2> /dev/null &
-    sleep 0.1 # don't question this hack
+    exec setsid "$@"
 }
 
 __slouch_term() {
