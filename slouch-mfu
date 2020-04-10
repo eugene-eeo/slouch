@@ -6,7 +6,7 @@ programs() {
         IFS=':'
         # shellcheck disable=2086
         find $PATH -type f,l -executable -printf '%f\n' | grep -v '^\[$' | sort -u
-        cat $mfu_file
+        cat "$mfu_file"
     } | {
         sort | uniq -c \
              | sort -k1rn -k2 \
