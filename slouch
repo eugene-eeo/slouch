@@ -120,7 +120,7 @@ usage="usage:
 
 __slouch_help() {
     echo "$usage"
-    exit "$0"
+    exit "$1"
 }
 
 
@@ -140,7 +140,13 @@ while [[ $# -gt 0 ]]; do
             echo "$?" > "$status"
             exit
             ;;
-        pipe|run|drun|file|windows) mode="$arg" ;;
+        pipe|run|drun|file|windows)
+            if [ -n "$mode" ]; then
+                mode="$arg"
+            else
+                __slouch_help 1
+            fi
+            ;;
         --)
             FZF_OPTIONS=("$@")
             break
