@@ -1,18 +1,21 @@
 #!/bin/bash
+
+### Hookable
+
 __slouch_fzf() {
-    mode=$1
-    shift
-    fzf +m --layout=reverse --margin=1,2 --prompt="$mode: " \
-        --color=prompt:7,pointer:7,spinner:2,info:8,hl:2,hl+:2,marker:0 "$@"
+    eval "fzf $SLOUCH_FZF_ARGS $(__slouch_fzf_get_args)"
 }
+
+
+__slouch_term() {
+    st -t 'slouch' -a -g "80x20+570+300" -e "$0" "$@"
+}
+
 
 __slouch_pdetach() {
     exec setsid "$@"
 }
 
-__slouch_term() {
-    st -t 'slouch' -a -g "80x20+570+300" -e "$0" "$@"
-}
 
 __slouch_window_ids() {
     IFS=', '
@@ -70,58 +73,112 @@ __slouch_drun() {
 # shellcheck source=/dev/null
 . ~/.config/slouch/hooks
 
+### Internal
+
+__slouch_fzf_get_args() {
+    opts=""
+    for arg in "${FZF_OPTIONS[@]}"; do
+      arg="${arg//\\/\\\\}"
+      arg="${arg//\"/\\\"}"
+      arg="${arg//\`/\\\`}"
+      arg="${arg//$/\\$}"
+      opts="$opts \"$arg\""
+    done
+    echo "$opts"
+}
+
 
 # shellcheck disable=2155
 __slouch_pipe() {
-    local mode="$1"
     local in=$(mktemp -u)
     local out=$(mktemp -u)
+    local status=$(mktemp -u)
 
     mkfifo "$in"
     mkfifo "$out"
-    __slouch_term _pipe "${mode:-pipe}" "$out" "$in" 2> /dev/null &
+    mkfifo "$status"
+    __slouch_term _pipe "$in" "$out" "$status" "${FZF_OPTIONS[@]}" 2> /dev/null &
     cat > "$in" &
     cat "$out"
-    rm "$in" "$out"
+    code=$(cat "$status")
+    rm "$in"
+    rm "$out"
+    rm "$status"
+    exit "${code:-1}"
 }
 
-case "$1" in
-    _drun)
-        if choice=$(__slouch_freedesktop_entries | __slouch_fzf drun -d'\t' --with-nth=4); then
+usage="usage:
+    slouch -h | --help
+    slouch <mode> -- [FZF OPTIONS]
+
+    mode is one of:
+        pipe:    use slouch as a popup fzf
+        run:     run programs on \$PATH
+        drun:    run freedesktop entries
+        file:    open files in ~
+        window:  switch between windows"
+
+__slouch_help() {
+    echo "$usage"
+    exit "$0"
+}
+
+
+FZF_OPTIONS=()
+mode=""
+
+while [[ $# -gt 0 ]]; do
+    arg="$1"
+    shift
+    case "$arg" in
+        _pipe)
+            in="$1";  shift
+            out="$1"; shift
+            status="$1"; shift
+            FZF_OPTIONS=("${@}")
+            __slouch_fzf > "$out" < "$in"
+            echo "$?" > "$status"
+            exit
+            ;;
+        pipe|run|drun|file|windows) mode="$arg" ;;
+        --)
+            FZF_OPTIONS=("$@")
+            break
+            ;;
+        --help|-h) __slouch_help 0 ;;
+        *)         __slouch_help 1 ;;
+    esac
+done
+
+case "$mode" in
+    pipe) __slouch_pipe ;;
+    run)
+        # readarray -d ':' -t path_array <<< "$PATH"
+        # shellcheck disable=2086
+        IFS=':'
+        choice=$(find $PATH -type f,l -executable -printf '%f\n' \
+            | grep -v '^\[$' \
+            | sort -u \
+            | "$0" pipe -- --prompt="run: " "${FZF_OPTIONS[@]}") && __slouch_pdetach "$choice"
+        ;;
+    drun)
+        if choice=$(__slouch_freedesktop_entries | "$0" pipe -- --prompt="drun: " "${FZF_OPTIONS[@]}" -d'\t' --with-nth=4); then
             term=$(echo "$choice" | cut -d$'\t' -f1)
             exec=$(echo "$choice" | cut -d$'\t' -f2)
             path=$(echo "$choice" | cut -d$'\t' -f3)
-            [ "$path" ] && (cd "$path" || exit)
-            __slouch_drun "$term" "$exec"
+            (
+                [ -z "$path" ] && (cd "$path" || exit)
+                __slouch_drun "$term" "$exec"
+            )
         fi
         ;;
-    _run)
-        IFS=':'
-        # shellcheck disable=2086
-        choice=$(find $PATH -type f,l -executable -printf '%f\n' | grep -v '^\[$' | sort -u | __slouch_fzf run) \
-            && __slouch_pdetach "$choice"
-        ;;
-    _filter)
-        choice=$(find ~ -name '.*' -prune -o -print | sed "s|^$HOME|~|" | __slouch_fzf filter) \
+    file)
+        choice=$(find ~ -name '.*' -prune -o -print | sed "s|^$HOME|~|" | "$0" pipe -- --prompt="files: " "${FZF_OPTIONS[@]}") \
             && __slouch_pdetach xdg-open "$HOME${choice:1}"
         ;;
-    _window)
-        wid=$(__slouch_window_ids | __slouch_fzf window -d'\t' --with-nth=2) \
+    window)
+        wid=$(__slouch_window_ids | "$0" pipe -- --prompt="window: " "${FZF_OPTIONS[@]}" -d'\t' --with-nth=2) \
             && __slouch_focus "$(echo "$wid" | cut -d$'\t' -f1)"
         ;;
-    _pipe)  __slouch_fzf "$2" > "$3" < "$4" ;;
-    run)    __slouch_term _run    ;;
-    drun)   __slouch_term _drun   ;;
-    filter) __slouch_term _filter ;;
-    window) __slouch_term _window ;;
-    pipe)   __slouch_pipe "$2"    ;;
-    -h|--help) rv=0 ;&
-    *)
-        echo 'usage:'
-        echo '  slouch run | drun | filter | window'
-        echo '  slouch pipe [<custom-mode>]'
-        echo '  slouch -h | --help'
-        [ "$rv" = 0 ] && exit 0
-        exit 1
-        ;;
+    *) __slouch_help 1 ;;
 esac

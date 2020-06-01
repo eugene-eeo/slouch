@@ -15,7 +15,7 @@ programs() {
     }
 }
 
-choice=$( programs | slouch pipe run )
+choice=$( programs | slouch pipe )
 if [ "$choice" != '' ]; then
     # update file
     output=$(head -n 49 $mfu_file)
