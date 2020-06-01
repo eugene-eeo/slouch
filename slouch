@@ -140,7 +140,7 @@ while [[ $# -gt 0 ]]; do
             echo "$?" > "$status"
             exit
             ;;
-        pipe|run|drun|file|windows)
+        pipe|run|drun|file|window)
             if [ -z "$mode" ]; then
                 mode="$arg"
             else
@@ -179,7 +179,7 @@ case "$mode" in
         fi
         ;;
     file)
-        choice=$(find ~ -name '.*' -prune -o -print | sed "s|^$HOME|~|" | "$0" pipe -- --prompt="files: " "${FZF_OPTIONS[@]}") \
+        choice=$(find ~ -name '.*' -prune -o -print | sed "s|^$HOME|~|" | "$0" pipe -- --prompt="file: " "${FZF_OPTIONS[@]}") \
             && __slouch_pdetach xdg-open "$HOME${choice:1}"
         ;;
     window)
