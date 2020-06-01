@@ -92,11 +92,12 @@ hc rule title='slouch' focus=on pseudotile=on
 
 ### available hooks
 
+See the code for full details; in brief:
+
 | Name                  | Description                                                       | Arguments |
 |-----------------------|-------------------------------------------------------------------|-----------|
 | `__slouch_focus`      | focus the given window                                            | `$1` = X window id |
 | `__slouch_pdetach`    | run and detach the given program from the shell                   | `$@` = command to be ran |
 | `__slouch_term`       | run a terminal which runs the slouch script with a given argument | `$@` = command to be ran |
-| `__slouch_fzf`        | run fzf                                                           | none (see code for details) |
 | `__slouch_window_ids` | get a tab separated list of window IDs and window names           | none |
 | `__slouch_drun`       | run a freedesktop entry                                           | `$1` = whether command should be ran in a terminal (empty = no), `$2` = command to be executed |
